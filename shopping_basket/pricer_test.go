@@ -95,6 +95,57 @@ func TestGetFree(t *testing.T) {
 	assert.Equal(Cost(1000), bill.discount)
 }
 
+func TestBothOffer(t *testing.T) {
+	assert := assert.New(t)
+
+	product := Product("product aaa")
+
+	catalogue := Catalogue{
+		prices: map[Product]Cost{
+			product: 100,
+		},
+	}
+
+	offers := Offers{
+		howManyToGetFree: map[Product]int{
+			product: 2,
+		},
+		discounts: map[Product]int{
+			product: 35,
+		},
+	}
+
+	b := NewBasket()
+	b.AddProduct(product, 3)
+
+	//take 35%
+	pricer := NewBasketPricer(catalogue, offers)
+	bill, err := pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(195), bill.total)
+	assert.Equal(Cost(300), bill.subtotal)
+	assert.Equal(Cost(105), bill.discount)
+
+	offers.discounts[product] = 30
+	//take "buy 2, get 1" free
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(200), bill.total)
+	assert.Equal(Cost(300), bill.subtotal)
+	assert.Equal(Cost(100), bill.discount)
+
+	b.AddProduct(product, 1)
+	//take "buy 2, get 1" free, and 30% for 4th product
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(270), bill.total)
+	assert.Equal(Cost(400), bill.subtotal)
+	assert.Equal(Cost(130), bill.discount)
+}
+
 func TestUnknownProduct(t *testing.T) {
 	assert := assert.New(t)
 

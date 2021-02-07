@@ -30,16 +30,24 @@ func (p *basketPricer) GetPrice(b *Basket) (*Bill, error) {
 		}
 		subtotal += price * Cost(amount)
 
-		// TODO: both offers
 		sale := p.offers.GetDiscount(product)
-		if sale > 0 && sale < 100 {
-			discount += Cost(sale) * price * Cost(amount) / Cost(100)
+		getFree := p.offers.HowManyToGetFree(product)
+
+		// both offers - it is needed to select better
+		if sale > 0 && getFree > 0 {
+			if sale*(getFree+1) > 100 {
+				getFree = 0
+			}
 		}
 
-		getFree := p.offers.HowManyToGetFree(product)
 		if getFree > 0 {
 			howMany := amount / (getFree + 1)
 			discount += Cost(howMany) * price
+			amount = amount % (getFree + 1)
+		}
+
+		if sale > 0 && sale < 100 {
+			discount += Cost(sale) * price * Cost(amount) / Cost(100)
 		}
 	}
 

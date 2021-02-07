@@ -30,9 +30,9 @@ func TestDiscount(t *testing.T) {
 	bill, err := pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(90), bill.total)
-	assert.Equal(Cost(100), bill.subtotal)
-	assert.Equal(Cost(10), bill.discount)
+	assert.Equal(Cost(90), bill.GetTotal())
+	assert.Equal(Cost(100), bill.GetSubtotal())
+	assert.Equal(Cost(10), bill.GetDiscount())
 }
 
 func TestGetFree(t *testing.T) {
@@ -58,41 +58,41 @@ func TestGetFree(t *testing.T) {
 	bill, err := pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(100), bill.total)
-	assert.Equal(Cost(100), bill.subtotal)
-	assert.Equal(Cost(0), bill.discount)
+	assert.Equal(Cost(100), bill.GetTotal())
+	assert.Equal(Cost(100), bill.GetSubtotal())
+	assert.Equal(Cost(0), bill.GetDiscount())
 
 	b.AddProduct(product, 1)
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(200), bill.total)
-	assert.Equal(Cost(200), bill.subtotal)
-	assert.Equal(Cost(0), bill.discount)
+	assert.Equal(Cost(200), bill.GetTotal())
+	assert.Equal(Cost(200), bill.GetSubtotal())
+	assert.Equal(Cost(0), bill.GetDiscount())
 
 	b.AddProduct(product, 1)
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(200), bill.total)
-	assert.Equal(Cost(300), bill.subtotal)
-	assert.Equal(Cost(100), bill.discount)
+	assert.Equal(Cost(200), bill.GetTotal())
+	assert.Equal(Cost(300), bill.GetSubtotal())
+	assert.Equal(Cost(100), bill.GetDiscount())
 
 	b.AddProduct(product, 27)
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(2000), bill.total)
-	assert.Equal(Cost(3000), bill.subtotal)
-	assert.Equal(Cost(1000), bill.discount)
+	assert.Equal(Cost(2000), bill.GetTotal())
+	assert.Equal(Cost(3000), bill.GetSubtotal())
+	assert.Equal(Cost(1000), bill.GetDiscount())
 
 	b.AddProduct(product, 1)
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(2100), bill.total)
-	assert.Equal(Cost(3100), bill.subtotal)
-	assert.Equal(Cost(1000), bill.discount)
+	assert.Equal(Cost(2100), bill.GetTotal())
+	assert.Equal(Cost(3100), bill.GetSubtotal())
+	assert.Equal(Cost(1000), bill.GetDiscount())
 }
 
 func TestBothOffer(t *testing.T) {
@@ -123,27 +123,27 @@ func TestBothOffer(t *testing.T) {
 	bill, err := pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(195), bill.total)
-	assert.Equal(Cost(300), bill.subtotal)
-	assert.Equal(Cost(105), bill.discount)
+	assert.Equal(Cost(195), bill.GetTotal())
+	assert.Equal(Cost(300), bill.GetSubtotal())
+	assert.Equal(Cost(105), bill.GetDiscount())
 
 	offers.discounts[product] = 30
 	//take "buy 2, get 1" free
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(200), bill.total)
-	assert.Equal(Cost(300), bill.subtotal)
-	assert.Equal(Cost(100), bill.discount)
+	assert.Equal(Cost(200), bill.GetTotal())
+	assert.Equal(Cost(300), bill.GetSubtotal())
+	assert.Equal(Cost(100), bill.GetDiscount())
 
 	b.AddProduct(product, 1)
 	//take "buy 2, get 1" free, and 30% for 4th product
 	bill, err = pricer.GetPrice(b)
 	assert.NoError(err)
 	assert.NotNil(bill)
-	assert.Equal(Cost(270), bill.total)
-	assert.Equal(Cost(400), bill.subtotal)
-	assert.Equal(Cost(130), bill.discount)
+	assert.Equal(Cost(270), bill.GetTotal())
+	assert.Equal(Cost(400), bill.GetSubtotal())
+	assert.Equal(Cost(130), bill.GetDiscount())
 }
 
 func TestUnknownProduct(t *testing.T) {

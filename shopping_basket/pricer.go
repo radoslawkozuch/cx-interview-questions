@@ -1,24 +1,46 @@
 package main
 
-type basketPricer struct {
-	catalogue Catalogue
-	offers    Offers
+type BasketPricer interface {
+	GetPrice(b *Basket) (Bill, error)
 }
 
-func NewBasketPricer(catalogue Catalogue, offers Offers) *basketPricer {
+type Bill interface {
+	GetSubtotal() Cost
+	GetDiscount() Cost
+	GetTotal() Cost
+}
+
+func NewBasketPricer(catalogue Catalogue, offers Offers) BasketPricer {
 	return &basketPricer{
 		catalogue: catalogue,
 		offers:    offers,
 	}
 }
 
-type Bill struct {
+type basketPricer struct {
+	catalogue Catalogue
+	offers    Offers
+}
+
+type bill struct {
 	subtotal Cost
 	discount Cost
 	total    Cost
 }
 
-func (p *basketPricer) GetPrice(b *Basket) (*Bill, error) {
+func (b *bill) GetSubtotal() Cost {
+	return b.subtotal
+}
+
+func (b *bill) GetDiscount() Cost {
+	return b.discount
+}
+
+func (b *bill) GetTotal() Cost {
+	return b.total
+}
+
+func (p *basketPricer) GetPrice(b *Basket) (Bill, error) {
 	products := b.GetAll()
 	var subtotal Cost
 	var discount Cost
@@ -51,7 +73,7 @@ func (p *basketPricer) GetPrice(b *Basket) (*Bill, error) {
 		}
 	}
 
-	return &Bill{
+	return &bill{
 		subtotal: subtotal,
 		discount: discount,
 		total:    subtotal - discount,

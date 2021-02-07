@@ -146,6 +146,58 @@ func TestBothOffer(t *testing.T) {
 	assert.Equal(Cost(130), bill.GetDiscount())
 }
 
+func TestEmptyBasket(t *testing.T) {
+	assert := assert.New(t)
+
+	b := NewBasket()
+	catalogue := Catalogue{}
+	offers := Offers{}
+
+	pricer := NewBasketPricer(catalogue, offers)
+	bill, err := pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(0), bill.GetTotal())
+	assert.Equal(Cost(0), bill.GetSubtotal())
+	assert.Equal(Cost(0), bill.GetDiscount())
+}
+
+func TestIncorrectBasket(t *testing.T) {
+	assert := assert.New(t)
+
+	product := Product("product aaa")
+
+	b := &Basket{
+		products: map[Product]int{
+			product: -1,
+		},
+	}
+
+	catalogue := Catalogue{
+		prices: map[Product]Cost{
+			product: 100,
+		},
+	}
+
+	offers := Offers{
+		discounts: map[Product]int{
+			product: 10,
+		},
+	}
+
+	pricer := NewBasketPricer(catalogue, offers)
+	bill, err := pricer.GetPrice(b)
+	assert.Error(err)
+	assert.Nil(bill)
+
+	b.products[product] = 1
+	catalogue.prices[product] = -100
+	pricer = NewBasketPricer(catalogue, offers)
+	bill, err = pricer.GetPrice(b)
+	assert.Error(err)
+	assert.Nil(bill)
+}
+
 func TestUnknownProduct(t *testing.T) {
 	assert := assert.New(t)
 
@@ -155,7 +207,6 @@ func TestUnknownProduct(t *testing.T) {
 	b.AddProduct(product, 1)
 
 	catalogue := Catalogue{}
-
 	offers := Offers{}
 
 	pricer := NewBasketPricer(catalogue, offers)

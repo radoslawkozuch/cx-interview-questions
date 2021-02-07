@@ -1,5 +1,9 @@
 package main
 
+import "errors"
+
+var IncorrectBasket = errors.New("IncorrectBasket")
+
 type BasketPricer interface {
 	GetPrice(b *Basket) (Bill, error)
 }
@@ -50,6 +54,11 @@ func (p *basketPricer) GetPrice(b *Basket) (Bill, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		if price < 0 || amount < 0 {
+			return nil, IncorrectBasket
+		}
+
 		subtotal += price * Cost(amount)
 
 		sale := p.offers.GetDiscount(product)

@@ -25,9 +25,15 @@ func (c *Catalogue) GetPrice(p Product) (Cost, error) {
 	return 0, ProductNotFoundError
 }
 
+type SpecialOffer struct {
+	applicableProducts []Product
+	requiredAmount     int
+}
+
 type Offers struct {
 	discounts        map[Product]int
 	howManyToGetFree map[Product]int
+	specialOffers    []SpecialOffer
 }
 
 func (o *Offers) GetDiscount(p Product) int {
@@ -36,6 +42,10 @@ func (o *Offers) GetDiscount(p Product) int {
 
 func (o *Offers) HowManyToGetFree(p Product) int {
 	return o.howManyToGetFree[p]
+}
+
+func (o *Offers) GetSpecialOffers() []SpecialOffer {
+	return o.specialOffers
 }
 
 type Basket struct {

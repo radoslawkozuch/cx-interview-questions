@@ -1,6 +1,9 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"sort"
+)
 
 var IncorrectBasket = errors.New("IncorrectBasket")
 
@@ -48,6 +51,30 @@ func (p *basketPricer) GetPrice(b *Basket) (Bill, error) {
 	products := b.GetAll()
 	var subtotal Cost
 	var discount Cost
+
+	for _, special := range p.offers.GetSpecialOffers() {
+
+		// products must be sorted - to select the most expensive for the offer
+		sort.Slice(special.applicableProducts, func(i, j int) bool {
+			price1, _ := p.catalogue.GetPrice(special.applicableProducts[i])
+			price2, _ := p.catalogue.GetPrice(special.applicableProducts[j])
+			return price1 > price2
+		})
+
+		howManyCollected := 0
+		for _, product := range special.applicableProducts {
+			howManyCollected += products[product]
+
+			if howManyCollected >= special.requiredAmount {
+				price, err := p.catalogue.GetPrice(product)
+				if err != nil {
+					return nil, err
+				}
+				discount += Cost(howManyCollected/special.requiredAmount) * price
+				howManyCollected %= special.requiredAmount
+			}
+		}
+	}
 
 	for product, amount := range products {
 		price, err := p.catalogue.GetPrice(product)

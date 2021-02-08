@@ -146,6 +146,73 @@ func TestBothOffer(t *testing.T) {
 	assert.Equal(Cost(130), bill.GetDiscount())
 }
 
+func TestSpecialOffer(t *testing.T) {
+	assert := assert.New(t)
+
+	productA := Product("product aaa")
+	productB := Product("product bbb")
+
+	catalogue := Catalogue{
+		prices: map[Product]Cost{
+			productA: 200,
+			productB: 100,
+		},
+	}
+
+	offers := Offers{
+		specialOffers: []SpecialOffer{
+			SpecialOffer{
+				applicableProducts: []Product{productA, productB},
+				requiredAmount:     3,
+			},
+		},
+	}
+
+	b := NewBasket()
+	b.AddProduct(productA, 1)
+	b.AddProduct(productB, 1)
+	pricer := NewBasketPricer(catalogue, offers)
+	bill, err := pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(300), bill.GetTotal())
+	assert.Equal(Cost(300), bill.GetSubtotal())
+	assert.Equal(Cost(0), bill.GetDiscount())
+
+	b.AddProduct(productB, 1)
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(300), bill.GetTotal())
+	assert.Equal(Cost(400), bill.GetSubtotal())
+	assert.Equal(Cost(100), bill.GetDiscount())
+
+	b.AddProduct(productA, 1)
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(500), bill.GetTotal())
+	assert.Equal(Cost(600), bill.GetSubtotal())
+	assert.Equal(Cost(100), bill.GetDiscount())
+
+	b.AddProduct(productA, 1)
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(600), bill.GetTotal())
+	assert.Equal(Cost(800), bill.GetSubtotal())
+	assert.Equal(Cost(200), bill.GetDiscount())
+
+	b.AddProduct(productA, 27)
+	b.AddProduct(productB, 28)
+	bill, err = pricer.GetPrice(b)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(6000), bill.GetTotal())
+	assert.Equal(Cost(9000), bill.GetSubtotal())
+	assert.Equal(Cost(3000), bill.GetDiscount())
+}
+
 func TestEmptyBasket(t *testing.T) {
 	assert := assert.New(t)
 
@@ -243,6 +310,12 @@ func TestFromReadme(t *testing.T) {
 		discounts: map[Product]int{
 			sardines: 25,
 		},
+		specialOffers: []SpecialOffer{
+			SpecialOffer{
+				applicableProducts: []Product{shampooSmall, shampooMedium, shampooLarge},
+				requiredAmount:     3,
+			},
+		},
 	}
 
 	basket1 := NewBasket()
@@ -269,4 +342,15 @@ func TestFromReadme(t *testing.T) {
 	assert.Equal(Cost(6.96), bill.GetSubtotal())
 	assert.Equal(Cost(0.95), bill.GetDiscount())
 
+	basket3 := NewBasket()
+	basket3.AddProduct(shampooLarge, 3)
+	basket3.AddProduct(shampooMedium, 1)
+	basket3.AddProduct(shampooSmall, 2)
+
+	bill, err = pricer.GetPrice(basket3)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(11.5), bill.GetTotal())
+	assert.Equal(Cost(17.0), bill.GetSubtotal())
+	assert.Equal(Cost(5.5), bill.GetDiscount())
 }

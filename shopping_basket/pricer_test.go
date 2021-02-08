@@ -214,3 +214,59 @@ func TestUnknownProduct(t *testing.T) {
 	assert.Error(err)
 	assert.Nil(bill)
 }
+
+func TestFromReadme(t *testing.T) {
+	assert := assert.New(t)
+
+	beans := Product("Baked Beans")
+	biscuits := Product("Biscuits")
+	sardines := Product("Sardines")
+	shampooSmall := Product("Shampoo (Small)")
+	shampooMedium := Product("Shampoo (Medium)")
+	shampooLarge := Product("Shampoo (Large)")
+
+	catalogue := Catalogue{
+		prices: map[Product]Cost{
+			beans:         0.99,
+			biscuits:      1.20,
+			sardines:      1.89,
+			shampooSmall:  2,
+			shampooMedium: 2.50,
+			shampooLarge:  3.50,
+		},
+	}
+
+	offers := Offers{
+		howManyToGetFree: map[Product]int{
+			beans: 2,
+		},
+		discounts: map[Product]int{
+			sardines: 25,
+		},
+	}
+
+	basket1 := NewBasket()
+	basket1.AddProduct(beans, 4)
+	basket1.AddProduct(biscuits, 1)
+
+	pricer := NewBasketPricer(catalogue, offers)
+	bill, err := pricer.GetPrice(basket1)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(4.17), bill.GetTotal())
+	assert.Equal(Cost(5.16), bill.GetSubtotal())
+	assert.Equal(Cost(0.99), bill.GetDiscount())
+
+	basket2 := NewBasket()
+	basket2.AddProduct(beans, 2)
+	basket2.AddProduct(biscuits, 1)
+	basket2.AddProduct(sardines, 2)
+
+	bill, err = pricer.GetPrice(basket2)
+	assert.NoError(err)
+	assert.NotNil(bill)
+	assert.Equal(Cost(6.01), bill.GetTotal())
+	assert.Equal(Cost(6.96), bill.GetSubtotal())
+	assert.Equal(Cost(0.95), bill.GetDiscount())
+
+}

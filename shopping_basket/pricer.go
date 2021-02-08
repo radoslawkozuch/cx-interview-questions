@@ -82,6 +82,8 @@ func (p *basketPricer) GetPrice(b *Basket) (Bill, error) {
 		}
 	}
 
+	discount.Round()
+
 	return &bill{
 		subtotal: subtotal,
 		discount: discount,

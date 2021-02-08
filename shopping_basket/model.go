@@ -2,10 +2,15 @@ package main
 
 import (
 	"errors"
+	"math"
 )
 
 type Product string
 type Cost float32
+
+func (c *Cost) Round() {
+	*c = Cost(math.Round(float64(*c*100)) / 100)
+}
 
 var ProductNotFoundError = errors.New("Product Not Found")
 
